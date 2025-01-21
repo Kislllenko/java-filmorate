@@ -10,7 +10,7 @@ import java.time.LocalDate;
 @Data
 @EqualsAndHashCode(of = {"id"})
 @Builder
-@FieldDefaults(level=AccessLevel.PRIVATE)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class User {
 
     Long id;
