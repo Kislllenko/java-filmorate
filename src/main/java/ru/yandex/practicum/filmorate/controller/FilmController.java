@@ -28,7 +28,7 @@ public class FilmController {
         return film;
     }
 
-    @PutMapping() //"/{id}"
+    @PutMapping()
     public Film updateFilm(@RequestBody Film film) {
 
         log.info("Пытаемся обновить фильм : {}", film);
