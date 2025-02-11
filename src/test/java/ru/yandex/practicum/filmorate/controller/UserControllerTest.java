@@ -4,17 +4,23 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
+
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class UserControllerTest {
 
-    UserController userController;
+    UserService userService;
 
     @BeforeEach
     void setUp() {
 
-        userController = new UserController();
+        userService = new UserService(new InMemoryUserStorage());
     }
 
     @Test
@@ -27,7 +33,7 @@ public class UserControllerTest {
                 .birthday(LocalDate.of(1988, 3, 12))
                 .build();
 
-        userController.validate(user);
+        userService.validate(user);
 
         assertEquals("Login", user.getName());
     }
@@ -42,7 +48,7 @@ public class UserControllerTest {
                 .birthday(LocalDate.of(1999, 1, 22))
                 .build();
 
-        userController.validate(user);
+        userService.validate(user);
 
         assertEquals("Login", user.getName());
     }
@@ -57,7 +63,7 @@ public class UserControllerTest {
                 .birthday(LocalDate.now())
                 .build();
 
-        assertThrows(ValidationException.class, () -> userController.validate(user));
+        assertThrows(ValidationException.class, () -> userService.validate(user));
     }
 
     @Test
@@ -70,7 +76,7 @@ public class UserControllerTest {
                 .birthday(LocalDate.now())
                 .build();
 
-        assertThrows(ValidationException.class, () -> userController.validate(user));
+        assertThrows(ValidationException.class, () -> userService.validate(user));
     }
 
     @Test
@@ -83,7 +89,7 @@ public class UserControllerTest {
                 .birthday(LocalDate.now().plusDays(1))
                 .build();
 
-        assertThrows(ValidationException.class, () -> userController.validate(user));
+        assertThrows(ValidationException.class, () -> userService.validate(user));
     }
 
     @Test
@@ -96,9 +102,9 @@ public class UserControllerTest {
                 .birthday(LocalDate.now())
                 .build();
 
-        userController.createUser(user);
+        userService.createUser(user);
 
-        assertTrue(userController.getData().contains(user));
+        assertTrue(userService.getAllUsers().contains(user));
 
     }
 
@@ -119,10 +125,15 @@ public class UserControllerTest {
                 .birthday(LocalDate.now())
                 .build();
 
-        userController.createUser(user1);
-        userController.createUser(user2);
+        List<User> listUsers = new ArrayList<>();
 
-        assertEquals(userController.getAllUsers(), userController.getData());
+        listUsers.add(user1);
+        listUsers.add(user2);
+
+        userService.createUser(user1);
+        userService.createUser(user2);
+
+        assertEquals(userService.getAllUsers(), listUsers);
     }
 
     @Test
@@ -135,13 +146,38 @@ public class UserControllerTest {
                 .birthday(LocalDate.now())
                 .build();
 
-        userController.createUser(user);
-        int allUsers = userController.getAllUsers().size();
+        userService.createUser(user);
+        int allUsers = userService.getAllUsers().size();
         user.setLogin("updatedLogin");
         user.setName("updatedName");
-        userController.updateUser(user);
+        userService.updateUser(user);
 
-        assertEquals(allUsers, userController.getAllUsers().size());
+        assertEquals(allUsers, userService.getAllUsers().size());
     }
 
+    @Test
+    public void shouldAddFriend() {
+
+        User user1 = User.builder()
+                .email("name1@mail.ru")
+                .login("Login1")
+                .name("User1")
+                .birthday(LocalDate.now())
+                .build();
+
+        User user2 = User.builder()
+                .email("name2@mail.ru")
+                .login("Login2")
+                .name("User2")
+                .birthday(LocalDate.now())
+                .build();
+
+        userService.createUser(user1);
+        userService.createUser(user2);
+
+        userService.addFriend(user1.getId(),user2.getId());
+
+        System.out.println(user1.getFriends());
+        System.out.println(user2.getFriends());
+    }
 }
