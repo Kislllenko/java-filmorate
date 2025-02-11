@@ -32,8 +32,9 @@ public class UserService {
         validate(user);
         log.info("Обновление данных пользователя : {}", user);
         if (inMemoryUserStorage.get(user.getId()) == null) {
-            log.warn("Обновление не выполнено, ID отсутствует в хранилище");
-            throw new DataNotFoundException("Обновление не выполнено, ID отсутствует в хранилище");
+            String msg = "Обновление не выполнено, ID отсутствует в хранилище";
+            log.warn(msg);
+            throw new DataNotFoundException(msg);
         }
         return inMemoryUserStorage.updateUser(user);
     }
@@ -69,8 +70,9 @@ public class UserService {
 
     public User getData(Long id) {
         if (inMemoryUserStorage.get(id) == null) {
-            log.info("Данные пользователя не найдены");
-            throw new DataNotFoundException("Данные пользователя не найдены");
+            String msg = "Данные пользователя не найдены";
+            log.warn(msg);
+            throw new DataNotFoundException(msg);
         }
         return inMemoryUserStorage.get(id);
     }
@@ -99,10 +101,14 @@ public class UserService {
 
     public void validateParameter(Long userId) {
         if (userId == null) {
-            throw new IncorrectParameterException("Некорректные параметры, необходимо проверить значение на null");
+            String msg = "Некорректные параметры, необходимо проверить значение на null";
+            log.warn(msg);
+            throw new IncorrectParameterException(msg);
         }
         if (getData(userId) == null) {
-            throw new DataNotFoundException(String.format("Пользователь с %d отсутствует", userId));
+            String msg = String.format("Пользователь с %d отсутствует", userId);
+            log.warn(msg);
+            throw new DataNotFoundException(msg);
         }
     }
 
@@ -111,7 +117,9 @@ public class UserService {
         User friend = getData(friendId);
         log.info("Валидация параметров UserService");
         if (user == null || friend == null) {
-            throw new DataNotFoundException("Друг не добавлен, таких пользователей нет");
+            String msg = "Друг не добавлен, таких пользователей нет";
+            log.warn(msg);
+            throw new DataNotFoundException(msg);
         }
     }
 }

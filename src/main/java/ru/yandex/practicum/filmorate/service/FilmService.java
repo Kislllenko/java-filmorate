@@ -37,8 +37,9 @@ public class FilmService {
         validate(film);
         log.info("Обновление данных о фильме : {}", film);
         if (inMemoryFilmStorage.get(film.getId()) == null) {
-            log.warn("Обновление не выполнено, ID отсутствует в хранилище");
-            throw new DataNotFoundException("Обновление не выполнено, ID отсутствует в хранилище");
+            String msg = "Обновление не выполнено, ID отсутствует в хранилище";
+            log.warn(msg);
+            throw new DataNotFoundException(msg);
         }
         return inMemoryFilmStorage.updateFilm(film);
     }
@@ -73,8 +74,9 @@ public class FilmService {
 
     public Film getData(Long id) {
         if (inMemoryFilmStorage.get(id) == null) {
-            log.info("Данные пользователя не найдены");
-            throw new DataNotFoundException("Данные пользователя не найдены");
+            String msg = "Данные пользователя не найдены";
+            log.warn(msg);
+            throw new DataNotFoundException(msg);
         }
         return inMemoryFilmStorage.get(id);
     }
@@ -103,10 +105,14 @@ public class FilmService {
 
     public void validateParameter(Long filmId) {
         if (filmId == null) {
-            throw new IncorrectParameterException("Некорректные параметры, необходимо проверить значение на null");
+            String msg = "Некорректные параметры, необходимо проверить значение на null";
+            log.warn(msg);
+            throw new IncorrectParameterException(msg);
         }
         if (getData(filmId) == null) {
-            throw new DataNotFoundException(String.format("Фильм с %d отсутствует", filmId));
+            String msg = String.format("Фильм с %d отсутствует", filmId);
+            log.warn(msg);
+            throw new DataNotFoundException(msg);
         }
     }
 
@@ -114,8 +120,8 @@ public class FilmService {
         User user = inMemoryUserStorage.get(userId);
         Film film = getData(filmId);
         if (film == null || user == null) {
-            log.info("Ошибка валидации. Необходимо проверить значение на null");
-            log.info("Ошибка валидации. Такого ID пользователя: {} или фильма {} нет", userId, filmId);
+            log.warn("Ошибка валидации. Необходимо проверить значение на null");
+            log.warn("Ошибка валидации. Такого ID пользователя: {} или фильма {} нет", userId, filmId);
             throw new IncorrectParameterException("Некорректные параметры, необходимо проверить значение на null");
         }
     }
