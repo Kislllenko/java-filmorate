@@ -38,7 +38,7 @@ public class FilmService {
         log.info("Обновление данных о фильме : {}", film);
         if (inMemoryFilmStorage.get(film.getId()) == null) {
             log.warn("Обновление не выполнено, ID отсутствует в хранилище");
-            throw new ValidationException("Обновление не выполнено, ID отсутствует в хранилище");
+            throw new DataNotFoundException("Обновление не выполнено, ID отсутствует в хранилище");
         }
         return inMemoryFilmStorage.updateFilm(film);
     }
@@ -106,7 +106,7 @@ public class FilmService {
             throw new IncorrectParameterException("Некорректные параметры, необходимо проверить значение на null");
         }
         if (getData(filmId) == null) {
-            throw new DataNotFoundException(String.format("Фильма с %d отсутствует", filmId));
+            throw new DataNotFoundException(String.format("Фильм с %d отсутствует", filmId));
         }
     }
 

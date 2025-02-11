@@ -33,7 +33,7 @@ public class UserService {
         log.info("Обновление данных пользователя : {}", user);
         if (inMemoryUserStorage.get(user.getId()) == null) {
             log.warn("Обновление не выполнено, ID отсутствует в хранилище");
-            throw new ValidationException("Обновление не выполнено, ID отсутствует в хранилище");
+            throw new DataNotFoundException("Обновление не выполнено, ID отсутствует в хранилище");
         }
         return inMemoryUserStorage.updateUser(user);
     }
