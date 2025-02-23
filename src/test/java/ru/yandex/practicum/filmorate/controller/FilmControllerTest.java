@@ -4,17 +4,22 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.storage.film.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
 import static org.junit.jupiter.api.Assertions.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FilmControllerTest {
 
-    FilmController filmController;
+    FilmService filmService;
 
     @BeforeEach
     void setUp() {
 
-        filmController = new FilmController();
+        filmService = new FilmService(new InMemoryFilmStorage(), new InMemoryUserStorage());
     }
 
     @Test
@@ -27,7 +32,7 @@ public class FilmControllerTest {
                 .releaseDate(LocalDate.of(1895, 12, 27))
                 .build();
 
-        assertThrows(ValidationException.class, () -> filmController.validate(film));
+        assertThrows(ValidationException.class, () -> filmService.validate(film));
     }
 
     @Test
@@ -40,7 +45,7 @@ public class FilmControllerTest {
                 .releaseDate(LocalDate.of(2001, 11, 4))
                 .build();
 
-        assertDoesNotThrow(() -> filmController.validate(film));
+        assertDoesNotThrow(() -> filmService.validate(film));
     }
 
     @Test
@@ -60,10 +65,15 @@ public class FilmControllerTest {
                 .releaseDate(LocalDate.of(2004, 9, 16))
                 .build();
 
-        filmController.createFilm(film1);
-        filmController.createFilm(film2);
+        List<Film> listFilms = new ArrayList<>();
 
-        assertEquals(filmController.getAllFilms(), filmController.getData());
+        listFilms.add(film1);
+        listFilms.add(film2);
+
+        filmService.createFilm(film1);
+        filmService.createFilm(film2);
+
+        assertEquals(filmService.getAllFilms(), listFilms);
     }
 
     @Test
@@ -76,14 +86,14 @@ public class FilmControllerTest {
                 .releaseDate(LocalDate.of(2001, 11, 4))
                 .build();
 
-        filmController.createFilm(film);
-        int allFilms = filmController.getAllFilms().size();
+        filmService.createFilm(film);
+        int allFilms = filmService.getAllFilms().size();
         film.setName("Harry Potter and the Prisoner of Azkaban");
         film.setDuration(142);
         film.setReleaseDate(LocalDate.of(2004, 9, 16));
-        filmController.updateFilm(film);
+        filmService.updateFilm(film);
 
-        assertEquals(allFilms, filmController.getAllFilms().size());
+        assertEquals(allFilms, filmService.getAllFilms().size());
     }
 
     @Test
@@ -95,7 +105,7 @@ public class FilmControllerTest {
                 .duration(120)
                 .build();
 
-        assertThrows(ValidationException.class, () -> filmController.validate(film));
+        assertThrows(ValidationException.class, () -> filmService.validate(film));
     }
 
     @Test
@@ -108,7 +118,7 @@ public class FilmControllerTest {
                 .duration(120)
                 .build();
 
-        assertThrows(ValidationException.class, () -> filmController.validate(film));
+        assertThrows(ValidationException.class, () -> filmService.validate(film));
     }
 
     @Test
@@ -120,7 +130,7 @@ public class FilmControllerTest {
                 .duration(120)
                 .build();
 
-        assertThrows(NullPointerException.class, () -> filmController.validate(film));
+        assertThrows(NullPointerException.class, () -> filmService.validate(film));
     }
 
     @Test
@@ -133,8 +143,7 @@ public class FilmControllerTest {
                 .duration(-1)
                 .build();
 
-        assertThrows(ValidationException.class, () -> filmController.validate(film));
+        assertThrows(ValidationException.class, () -> filmService.validate(film));
     }
-
 }
 

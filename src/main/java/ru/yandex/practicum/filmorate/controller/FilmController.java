@@ -1,90 +1,56 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
+import ru.yandex.practicum.filmorate.service.FilmService;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/films")
 @Slf4j
+@RequiredArgsConstructor
 public class FilmController {
 
-    private final Map<Long, Film> storage = new HashMap<>();
-    private static final LocalDate LAST_RELEASE_DATE = LocalDate.of(1895, 12, 28);
+    private final FilmService filmService;
 
     @PostMapping
     public Film createFilm(@RequestBody Film film) {
-
-        log.info("Добавление фильма : {}", film);
-        validate(film);
-        film.setId(getNextId());
-        storage.put(film.getId(), film);
-        return film;
+        return filmService.createFilm(film);
     }
 
     @PutMapping()
     public Film updateFilm(@RequestBody Film film) {
-
-        log.info("Пытаемся обновить фильм : {}", film);
-        validate(film);
-
-        if (!storage.containsKey(film.getId())) {
-            throw new ValidationException("Обновление не выполнено, id отсутствует в хранилище");
-        }
-
-        storage.put(film.getId(), film);
-        return film;
+        return filmService.updateFilm(film);
     }
 
     @GetMapping
     public List<Film> getAllFilms() {
-
-        log.info("Текущее количество фильмов: {}", getData().size());
-        return getData();
+        return filmService.getAllFilms();
     }
 
-    public List<Film> getData() {
-
-        return new ArrayList<>(storage.values());
+    @GetMapping("/{id}")
+    public Film getFilm(@RequestBody @PathVariable Long id) {
+        log.info("Получаем объект по id: {}", id);
+        return filmService.getData(id);
     }
 
-    public void validate(Film film) {
-
-        if (film.getReleaseDate().isBefore(LAST_RELEASE_DATE)) {
-            log.warn("Дата выпуска меньше 1895.12.28 : {}", film.getReleaseDate());
-            throw new ValidationException("Дата выпуска меньше 1895.12.28");
-        }
-        if (film.getName() == null || film.getName().isBlank()) {
-            String msg = "Название не может быть null или пустым";
-            log.warn(msg);
-            throw new ValidationException(msg);
-        }
-        if (film.getDescription().length() > 200) {
-            String msg = "Максимальная длина описания — 200 символов";
-            log.warn(msg);
-            throw new ValidationException(msg);
-        }
-        if (film.getDuration() <= 0) {
-            String msg = "Продолжительность фильма не может быть <= 0";
-            log.warn(msg);
-            throw new ValidationException(msg);
-        }
+    @PutMapping("/{id}/like/{userId}")
+    public boolean likeFilm(@RequestBody @PathVariable Long id, @PathVariable Long userId) {
+        log.info("Пользователь с id: {} пытается поставить лайк фильму с айди {}", id, userId);
+        return filmService.addLike(id, userId);
     }
 
-    // вспомогательный метод для генерации идентификатора нового фильма
-    private long getNextId() {
+    @DeleteMapping("/{id}/like/{userId}")
+    public boolean removeFilmLike(@PathVariable Long id, @PathVariable Long userId) {
+        log.info("Пользователь с id: {} пытается удалить лайк у фильма с айди {}", id, userId);
+        return filmService.deleteLike(id, userId);
+    }
 
-        long currentMaxId = storage.keySet()
-                .stream()
-                .mapToLong(id -> id)
-                .max()
-                .orElse(0);
-        return ++currentMaxId;
+    @GetMapping("/popular")
+    public List<Film> getPopularFilms(@RequestParam(defaultValue = "10") int count) {
+        log.info("Пытаемся получить фильмы с наибольшим количеством лайков: {} шт.", count);
+        return filmService.getPopularFilms(count);
     }
 }
